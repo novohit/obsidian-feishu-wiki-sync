@@ -1,0 +1,681 @@
+/* =====================================================
+   飞书知识库同步 - 插件样式
+   遵循 Obsidian 主题变量，自动适配亮色/暗色主题
+   ===================================================== */
+
+/* ── 设置页面 ──────────────────────────────────────── */
+
+.feishu-connection-status {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.9em;
+}
+
+.feishu-status-success {
+  color: var(--color-green);
+}
+
+.feishu-status-error {
+  color: var(--color-red);
+}
+
+.feishu-help-block {
+  background: var(--background-secondary);
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-size: 0.9em;
+  color: var(--text-muted);
+}
+
+.feishu-help-block ul {
+  margin: 8px 0 0 0;
+  padding-left: 20px;
+}
+
+.feishu-help-block li {
+  margin: 4px 0;
+  font-family: var(--font-monospace);
+  font-size: 0.85em;
+}
+
+/* ── 知识空间浏览器弹窗 ────────────────────────────── */
+
+.feishu-wiki-browser {
+  min-width: 480px;
+}
+
+.feishu-setting-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.feishu-setting-row label {
+  min-width: 72px;
+  color: var(--text-muted);
+  font-size: 0.9em;
+}
+
+.feishu-select {
+  flex: 1;
+  background: var(--background-modifier-form-field);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  color: var(--text-normal);
+  padding: 4px 8px;
+  font-size: 0.9em;
+}
+
+.feishu-label {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.9em;
+  margin-bottom: 6px;
+}
+
+.feishu-tree-container {
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 4px 0;
+  margin-bottom: 12px;
+}
+
+.feishu-node-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  user-select: none;
+}
+
+.feishu-node-row:hover {
+  background: var(--background-modifier-hover);
+}
+
+.feishu-node-row.is-selected {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.feishu-node-toggle {
+  cursor: pointer;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+}
+
+.feishu-node-title {
+  flex: 1;
+  font-size: 0.9em;
+}
+
+.feishu-loading {
+  color: var(--text-muted);
+  font-size: 0.85em;
+  padding: 4px 8px;
+}
+
+.feishu-selected-label {
+  font-size: 0.85em;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.feishu-btn-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* ── 批量同步进度弹窗 ──────────────────────────────── */
+
+.feishu-progress-modal {
+  min-width: 460px;
+}
+
+.feishu-progress-container {
+  height: 8px;
+  background: var(--background-modifier-border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 12px 0 4px;
+}
+
+.feishu-progress-bar {
+  height: 100%;
+  background: var(--interactive-accent);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.feishu-progress-text {
+  font-size: 0.85em;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.feishu-file-list {
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  padding: 4px 0;
+  margin-bottom: 12px;
+}
+
+.feishu-file-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 0.85em;
+}
+
+.feishu-file-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.feishu-file-item.is-done .feishu-file-icon {
+  color: var(--color-green);
+}
+
+.feishu-file-item.is-syncing .feishu-file-icon {
+  color: var(--interactive-accent);
+  animation: feishu-spin 1s linear infinite;
+}
+
+.feishu-file-item.is-error .feishu-file-icon {
+  color: var(--color-red);
+}
+
+.feishu-error-msg {
+  color: var(--color-red);
+  font-size: 0.85em;
+}
+
+.feishu-error {
+  color: var(--color-red);
+}
+
+.feishu-muted {
+  color: var(--text-muted);
+}
+
+/* ══════════════════════════════════════════════════════
+   侧边栏面板 - 磨砂半透明风格
+   ══════════════════════════════════════════════════════ */
+
+.feishu-sidebar {
+  padding: 0;
+  font-size: var(--font-ui-small);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ── 连接状态栏（磨砂背景）──────────────────────────── */
+
+.feishu-sidebar-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(var(--background-modifier-border-rgb, 128,128,128), 0.3);
+  background: rgba(var(--background-secondary-rgb, 30,30,30), 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-size: 0.82em;
+  min-height: 32px;
+  flex-shrink: 0;
+}
+
+.feishu-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.feishu-dot-green {
+  background: var(--color-green);
+}
+
+.feishu-dot-gray {
+  background: var(--text-faint);
+}
+
+.feishu-status-text {
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feishu-status-node-text {
+  color: var(--text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feishu-status-config-btn {
+  margin-left: auto;
+  font-size: 0.85em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: none;
+}
+
+.feishu-status-config-btn:hover {
+  opacity: 0.85;
+}
+
+/* ── 操作栏 ──────────────────────────────────────────── */
+
+.feishu-sidebar-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(var(--background-modifier-border-rgb, 128,128,128), 0.3);
+  background: rgba(var(--background-secondary-rgb, 30,30,30), 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  flex-shrink: 0;
+}
+
+.feishu-toolbar-spacer {
+  flex: 1;
+}
+
+.feishu-toolbar-btn {
+  background: rgba(var(--background-modifier-hover-rgb, 128,128,128), 0.15);
+  border: 1px solid rgba(var(--background-modifier-border-rgb, 128,128,128), 0.2);
+  cursor: pointer;
+  padding: 5px 6px;
+  border-radius: 6px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  transition: all 0.15s ease;
+}
+
+.feishu-toolbar-btn:hover {
+  background: rgba(var(--background-modifier-hover-rgb, 128,128,128), 0.3);
+  color: var(--text-normal);
+  border-color: rgba(var(--background-modifier-border-rgb, 128,128,128), 0.4);
+}
+
+.feishu-toolbar-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.feishu-toolbar-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.feishu-toolbar-btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px 4px 8px;
+  background: rgba(var(--interactive-accent-rgb, 72, 120, 255), 0.85);
+  color: var(--text-on-accent);
+  border: 1px solid rgba(var(--interactive-accent-rgb, 72, 120, 255), 0.5);
+  border-radius: 6px;
+  font-size: 0.82em;
+  font-weight: 500;
+  backdrop-filter: blur(8px);
+  transition: all 0.15s ease;
+}
+
+.feishu-toolbar-btn-primary:hover {
+  background: rgba(var(--interactive-accent-rgb, 72, 120, 255), 1);
+  color: var(--text-on-accent);
+}
+
+.feishu-toolbar-btn-primary:disabled {
+  background: var(--interactive-accent);
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.feishu-toolbar-btn-icon {
+  display: flex;
+  align-items: center;
+}
+
+.feishu-toolbar-btn-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.feishu-toolbar-btn-label {
+  white-space: nowrap;
+}
+
+/* ── 搜索栏 ──────────────────────────────────────────── */
+
+.feishu-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(var(--background-modifier-border-rgb, 128,128,128), 0.3);
+  background: rgba(var(--background-secondary-rgb, 30,30,30), 0.3);
+  flex-shrink: 0;
+}
+
+.feishu-search-icon {
+  color: var(--text-faint);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.feishu-search-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.feishu-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-normal);
+  font-size: 0.85em;
+  outline: none;
+  padding: 2px 0;
+  min-width: 0;
+}
+
+.feishu-search-input::placeholder {
+  color: var(--text-faint);
+}
+
+.feishu-search-clear {
+  cursor: pointer;
+  color: var(--text-faint);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.feishu-search-clear:hover {
+  color: var(--text-muted);
+}
+
+.feishu-search-clear svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* ── 过滤栏 ──────────────────────────────────────────── */
+
+.feishu-filter-bar {
+  display: flex;
+  gap: 0;
+  padding: 0 8px;
+  border-bottom: 1px solid rgba(var(--background-modifier-border-rgb, 128,128,128), 0.3);
+  background: rgba(var(--background-secondary-rgb, 30,30,30), 0.3);
+  flex-shrink: 0;
+}
+
+.feishu-filter-tab {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  font-size: 0.78em;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  user-select: none;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.feishu-filter-tab:hover {
+  color: var(--text-normal);
+}
+
+.feishu-filter-tab.is-active {
+  color: var(--text-normal);
+  border-bottom-color: var(--interactive-accent);
+  font-weight: 600;
+}
+
+.feishu-filter-badge {
+  background: rgba(var(--background-modifier-border-rgb, 128,128,128), 0.3);
+  color: var(--text-muted);
+  border-radius: 8px;
+  padding: 0 6px;
+  font-size: 0.85em;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.feishu-filter-tab.is-active .feishu-filter-badge {
+  background: rgba(var(--interactive-accent-rgb, 72, 120, 255), 0.8);
+  color: var(--text-on-accent);
+}
+
+/* ── 文件树容器 ──────────────────────────────────────── */
+
+.feishu-tree-view {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2px 0;
+}
+
+.feishu-tree-empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 0.85em;
+}
+
+/* ── 树行 - 通用 ────────────────────────────────────── */
+
+.feishu-tree-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-right: 8px;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 4px;
+  min-height: 28px;
+  margin: 1px 4px;
+  transition: background 0.1s ease;
+}
+
+.feishu-tree-row:hover {
+  background: rgba(var(--background-modifier-hover-rgb, 128,128,128), 0.2);
+}
+
+/* ── 展开/折叠箭头 ──────────────────────────────────── */
+
+.feishu-tree-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--text-faint);
+  cursor: pointer;
+}
+
+.feishu-tree-toggle:hover {
+  color: var(--text-muted);
+}
+
+.feishu-tree-toggle svg {
+  width: 12px;
+  height: 12px;
+}
+
+.feishu-tree-toggle-spacer {
+  visibility: hidden;
+}
+
+/* ── 复选框 ──────────────────────────────────────────── */
+
+.feishu-tree-checkbox {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--interactive-accent);
+}
+
+/* ── 树图标 ──────────────────────────────────────────── */
+
+.feishu-tree-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--text-faint);
+}
+
+.feishu-tree-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.feishu-tree-folder-row .feishu-tree-icon {
+  color: var(--text-muted);
+}
+
+/* ── 同步状态图标 ────────────────────────────────────── */
+
+.feishu-tree-status {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.feishu-tree-status svg {
+  width: 12px;
+  height: 12px;
+}
+
+.feishu-status-synced {
+  color: var(--color-green);
+}
+
+.feishu-status-update {
+  color: var(--color-yellow);
+}
+
+.feishu-status-none {
+  color: var(--text-faint);
+}
+
+/* ── 节点名称 ────────────────────────────────────────── */
+
+.feishu-tree-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.87em;
+  padding: 0 2px;
+  line-height: 1.4;
+}
+
+.feishu-tree-file-name {
+  cursor: pointer;
+}
+
+.feishu-tree-file-name:hover {
+  color: var(--text-accent);
+  text-decoration: underline;
+}
+
+/* ── 文件夹 badge ──────────────────────────────────── */
+
+.feishu-tree-folder-badge {
+  font-size: 0.7em;
+  color: var(--text-muted);
+  background: rgba(var(--background-modifier-border-rgb, 128,128,128), 0.3);
+  border: 1px solid rgba(var(--background-modifier-border-rgb, 128,128,128), 0.15);
+  border-radius: 8px;
+  padding: 1px 6px;
+  flex-shrink: 0;
+  line-height: 1.4;
+  backdrop-filter: blur(4px);
+}
+
+/* ── 单文件同步按钮 ──────────────────────────────────── */
+
+.feishu-tree-file-sync-btn {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  color: var(--text-faint);
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+.feishu-tree-row:hover .feishu-tree-file-sync-btn {
+  opacity: 1;
+}
+
+.feishu-tree-file-sync-btn:hover {
+  color: var(--text-accent);
+}
+
+.feishu-tree-file-sync-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ── 选中状态行 ──────────────────────────────────────── */
+
+.feishu-tree-file-row.is-checked {
+  background: rgba(var(--interactive-accent-rgb, 72, 120, 255), 0.1);
+  border: 1px solid rgba(var(--interactive-accent-rgb, 72, 120, 255), 0.15);
+}
+
+.feishu-tree-file-row.is-checked:hover {
+  background: rgba(var(--interactive-accent-rgb, 72, 120, 255), 0.18);
+}
+
+/* ── 子节点容器（用于树缩进线） ────────────────────── */
+
+.feishu-tree-children {
+  position: relative;
+}
+
+/* ── 动画 ────────────────────────────────────────────── */
+
+@keyframes feishu-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

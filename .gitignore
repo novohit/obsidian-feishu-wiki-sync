@@ -1,0 +1,15 @@
+node_modules/
+main.js
+*.js.map
+data.json
+
+# AI/editor config
+.super-dev/
+.claude/
+.claude-plugin/
+.cursor/
+output/
+plugins/
+CLAUDE.md
+super-dev.yaml
+package-lock.json
