@@ -29,6 +29,7 @@ import { SyncStateManager, SyncMeta } from "./sync-state";
 export interface SyncResult {
   success: boolean;
   fileName: string;
+  skipped?: boolean;
   error?: string;
 }
 
@@ -77,6 +78,15 @@ export class SyncEngine {
     }
 
     try {
+      if (!this.matchesFrontmatterFilter(file)) {
+        return {
+          success: true,
+          skipped: true,
+          fileName: file.name,
+          error: "不符合 frontmatter 过滤条件，已跳过",
+        };
+      }
+
       // 读取文件内容
       const rawContent = await this.app.vault.read(file);
       const content = stripFrontmatter(rawContent);
@@ -90,6 +100,15 @@ export class SyncEngine {
       let node: WikiNode;
 
       if (existingMeta?.nodeToken && existingMeta.spaceId === spaceId) {
+        if (this.settings.updateStrategy === "skip-if-exists") {
+          return {
+            success: true,
+            skipped: true,
+            fileName: file.name,
+            error: "已存在同步记录，按当前更新策略跳过",
+          };
+        }
+
         // 更新现有节点
         node = {
           space_id: spaceId,
@@ -138,6 +157,35 @@ export class SyncEngine {
       const error = err instanceof Error ? err.message : String(err);
       return { success: false, fileName: file.name, error };
     }
+  }
+
+  /**
+   * 判断文件是否符合设置中的 frontmatter 过滤规则。
+   *
+   * 支持两种写法：
+   * - `publish`：frontmatter 中存在 publish 字段即可同步
+   * - `publish: true`：frontmatter 字段值必须匹配 true
+   */
+  private matchesFrontmatterFilter(file: TFile): boolean {
+    const filter = this.settings.frontmatterFilter.trim();
+    if (!filter) return true;
+
+    const frontmatter = this.app.metadataCache.getFileCache(file)?.frontmatter;
+    if (!frontmatter) return false;
+
+    const separatorIndex = filter.indexOf(":");
+    if (separatorIndex === -1) {
+      return Object.prototype.hasOwnProperty.call(frontmatter, filter);
+    }
+
+    const key = filter.slice(0, separatorIndex).trim();
+    const expected = filter.slice(separatorIndex + 1).trim();
+    if (!key) return true;
+
+    const actual = frontmatter[key];
+    if (actual === undefined || actual === null) return false;
+
+    return String(actual).trim().toLowerCase() === expected.toLowerCase();
   }
 
   /**
@@ -207,7 +255,8 @@ export class SyncEngine {
     folder: TFolder,
     targetSpaceId: string,
     targetParentNodeToken: string,
-    onProgress?: (done: number, total: number, currentFile: string) => void
+    onProgress?: (done: number, total: number, currentFile: string) => void,
+    shouldCancel?: () => boolean
   ): Promise<SyncResult[]> {
     // 收集所有要同步的 .md 文件
     const files = this.collectMarkdownFiles(folder);
@@ -234,6 +283,10 @@ export class SyncEngine {
     folderNodeCache.set(folder.path, rootNode.node_token);
 
     for (let i = 0; i < filteredFiles.length; i++) {
+      if (shouldCancel?.()) {
+        break;
+      }
+
       const file = filteredFiles[i];
       onProgress?.(i, filteredFiles.length, file.name);
 
@@ -309,15 +362,17 @@ export class SyncEngine {
     documentId: string,
     sourceFilePath: string
   ): Promise<DocxBlock[]> {
-    if (!this.settings.uploadLocalImages || pendingImages.length === 0) {
-      // 不上传图片时，移除 pending 图片 block（避免空 token 报错）
-      const pendingIndexes = new Set(pendingImages.map((p) => p.blockIndex));
-      return blocks.filter((_, idx) => !pendingIndexes.has(idx));
-    }
+    if (pendingImages.length === 0) return blocks;
 
     const processedBlocks = [...blocks];
 
     for (const pending of pendingImages) {
+      const isRemoteImage = pending.src.startsWith("http://") || pending.src.startsWith("https://");
+      if (!this.settings.uploadLocalImages && !isRemoteImage) {
+        processedBlocks[pending.blockIndex] = this.createImageFallbackBlock(pending);
+        continue;
+      }
+
       const fileToken = await this.imageResolver.resolveAndUpload(
         pending.src,
         documentId,
@@ -331,22 +386,27 @@ export class SyncEngine {
         };
       } else {
         // 上传失败：替换为显示图片路径的文本（不丢失信息）
-        processedBlocks[pending.blockIndex] = {
-          block_type: 2,
-          text: {
-            elements: [
-              {
-                text_run: {
-                  content: `[图片: ${pending.alt || pending.src}]`,
-                  text_element_style: { italic: true },
-                },
-              },
-            ],
-          },
-        };
+        processedBlocks[pending.blockIndex] = this.createImageFallbackBlock(pending);
       }
     }
 
     return processedBlocks;
+  }
+
+  /** 图片未上传时写入文本占位，避免生成空 token 的非法图片块。 */
+  private createImageFallbackBlock(pending: { alt: string; src: string }): DocxBlock {
+    return {
+      block_type: 2,
+      text: {
+        elements: [
+          {
+            text_run: {
+              content: `[图片: ${pending.alt || pending.src}]`,
+              text_element_style: { italic: true },
+            },
+          },
+        ],
+      },
+    };
   }
 }

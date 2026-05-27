@@ -1,27 +1,65 @@
 # Obsidian Feishu Wiki Sync
 
-Sync Obsidian notes to Feishu/Lark Knowledge Base. Preserves folder structure, supports visual configuration, connection testing, and selective sync.
+Sync Obsidian Markdown notes to a Feishu Wiki knowledge base while preserving the folder structure.
+
+> Current builds are verified against Feishu China (`open.feishu.cn`). Lark international endpoints are not verified yet.
 
 ## Features
 
-- **Visual Configuration** -- Settings tab with App ID/Secret input, one-click connection test
-- **Wiki Space Browser** -- Tree-based node selector for choosing sync targets
-- **Directory Structure Mapping** -- Vault folder hierarchy auto-mapped to Feishu wiki node tree
-- **Selective Sync** -- Sidebar with folder tree, checkboxes, filters, and search
-- **Batch Sync** -- Select multiple files/folders and sync with progress modal
-- **Incremental Updates** -- Frontmatter tracks sync state, only pushes changed files
-- **No Third-Party Relay** -- Uses `tenant_access_token` directly, no OAuth middleware
+- Visual settings tab for Feishu App ID / App Secret.
+- One-click connection test.
+- Wiki space and node browser.
+- Folder-tree sidebar with selective and batch sync.
+- Markdown to Feishu Docx block conversion.
+- Local and remote image upload support.
+- Sync metadata stored in note frontmatter.
 
-## Quick Start
+## Installation
 
-1. Create a Feishu self-built app at [open.feishu.cn](https://open.feishu.cn)
-2. Enable permissions: `wiki:wiki`, `docx:document`, `drive:drive`
-3. Add the app to your wiki space (via group membership)
-4. Install this plugin in Obsidian
-5. Configure App ID/Secret in plugin settings
-6. Click "Test Connection" -- done
+The complete installation guide is maintained in Chinese:
 
-See [README.md](./README.md) for detailed setup instructions (Chinese).
+- [README.md](./README.md)
+- [docs/TUTORIAL.md](./docs/TUTORIAL.md)
+
+Short version:
+
+1. Download `main.js`, `manifest.json`, and `styles.css` from the latest GitHub Release.
+2. Copy them into your Obsidian vault:
+
+```text
+.obsidian/plugins/obsidian-feishu-wiki-sync/
+```
+
+3. Restart Obsidian.
+4. Enable the plugin from `Settings -> Community plugins`.
+5. Configure your Feishu App ID and App Secret.
+6. Test connection and choose a target wiki space.
+
+If no Release is available, build from source:
+
+```bash
+npm install
+npm run build
+```
+
+Then copy `main.js`, `manifest.json`, and `styles.css` into the plugin directory above.
+
+## Feishu Permissions
+
+Create a Feishu self-built app and enable:
+
+- `wiki:wiki`
+- `docx:document`
+- `drive:drive`
+
+You must also add the app, or a group containing the app bot, to the target wiki space. A successful App ID / App Secret test only proves the app identity is valid; it does not prove that the target wiki space is accessible.
+
+## Privacy
+
+- App Secret and cached access token are stored locally in Obsidian plugin `data.json`.
+- Do not publish `.obsidian/plugins/obsidian-feishu-wiki-sync/data.json`.
+- Synced notes receive `feishu_*` frontmatter fields containing Feishu space, node, and document identifiers.
+- Remove or redact those fields before publishing a vault, screenshots, or logs publicly.
 
 ## License
 

@@ -38,6 +38,8 @@ export default class FeishuWikiPlugin extends Plugin {
   private docApi!: DocApi;
   private driveApi!: DriveApi;
   private syncEngine!: SyncEngine;
+  private syncingPaths = new Set<string>();
+  private bulkSyncInProgress = false;
 
   async onload(): Promise<void> {
     // 加载设置
@@ -75,7 +77,9 @@ export default class FeishuWikiPlugin extends Plugin {
         if (
           this.settings.syncMode === "on-save" &&
           file instanceof TFile &&
-          file.extension === "md"
+          file.extension === "md" &&
+          !this.bulkSyncInProgress &&
+          !this.syncingPaths.has(file.path)
         ) {
           await this.syncSingleFile(file);
         }
@@ -232,6 +236,10 @@ export default class FeishuWikiPlugin extends Plugin {
       return;
     }
 
+    if (this.syncingPaths.has(file.path)) {
+      return;
+    }
+
     if (!this.settings.defaultSpaceId) {
       // 没有配置默认空间，弹出浏览器让用户选择
       new WikiBrowserModal(
@@ -241,15 +249,22 @@ export default class FeishuWikiPlugin extends Plugin {
         "",
         async (result) => {
           if (!result) return;
-          const syncResult = await this.syncEngine.syncFile(
-            file,
-            result.spaceId,
-            result.nodeToken
-          );
-          if (syncResult.success) {
-            new Notice(`已同步: ${file.basename}`, 3000);
-          } else {
-            new Notice(`同步失败: ${syncResult.error}`, 5000);
+          this.syncingPaths.add(file.path);
+          try {
+            const syncResult = await this.syncEngine.syncFile(
+              file,
+              result.spaceId,
+              result.nodeToken
+            );
+            if (syncResult.skipped) {
+              new Notice(`已跳过: ${file.basename}`, 3000);
+            } else if (syncResult.success) {
+              new Notice(`已同步: ${file.basename}`, 3000);
+            } else {
+              new Notice(`同步失败: ${syncResult.error}`, 5000);
+            }
+          } finally {
+            this.releaseSyncLock(file.path);
           }
         }
       ).open();
@@ -258,13 +273,27 @@ export default class FeishuWikiPlugin extends Plugin {
 
     // 有默认配置，直接同步
     new Notice(`正在同步: ${file.basename}...`, 2000);
-    const result = await this.syncEngine.syncFile(file);
-    if (result.success) {
-      new Notice(`已同步到飞书: ${file.basename}`, 3000);
-    } else {
-      new Notice(`同步失败: ${result.error}`, 5000);
+    this.syncingPaths.add(file.path);
+    try {
+      const result = await this.syncEngine.syncFile(file);
+      if (result.skipped) {
+        new Notice(`已跳过: ${file.basename}`, 3000);
+      } else if (result.success) {
+        new Notice(`已同步到飞书: ${file.basename}`, 3000);
+      } else {
+        new Notice(`同步失败: ${result.error}`, 5000);
+      }
+    } finally {
+      this.releaseSyncLock(file.path);
     }
     this.refreshSidebar();
+  }
+
+  /** 延迟释放同步锁，避免 frontmatter 写入触发保存时自动同步。 */
+  private releaseSyncLock(path: string): void {
+    window.setTimeout(() => {
+      this.syncingPaths.delete(path);
+    }, 1000);
   }
 
   /**
@@ -289,23 +318,34 @@ export default class FeishuWikiPlugin extends Plugin {
       cancelled = true;
     });
 
-    const results = await this.syncEngine.syncFolder(
-      folder,
-      this.settings.defaultSpaceId,
-      this.settings.defaultParentNodeToken,
-      (done, total, currentFile) => {
-        progressModal.updateProgress(done, total, currentFile);
-        if (currentFile) {
-          progressModal.setFileStatus(currentFile, "syncing");
-        }
-      }
-    );
+    this.bulkSyncInProgress = true;
+    let results;
+    try {
+      results = await this.syncEngine.syncFolder(
+        folder,
+        this.settings.defaultSpaceId,
+        this.settings.defaultParentNodeToken,
+        (done, total, currentFile) => {
+          progressModal.updateProgress(done, total, currentFile);
+          if (currentFile) {
+            progressModal.setFileStatus(currentFile, "syncing");
+          }
+        },
+        () => cancelled
+      );
+    } finally {
+      this.bulkSyncInProgress = false;
+    }
 
     // 更新最终状态
     let successCount = 0;
     let failCount = 0;
+    let skippedCount = 0;
     for (const result of results) {
-      if (result.success) {
+      if (result.skipped) {
+        skippedCount++;
+        progressModal.setFileStatus(result.fileName, "done", result.error);
+      } else if (result.success) {
         successCount++;
         progressModal.setFileStatus(result.fileName, "done");
       } else {
@@ -317,8 +357,8 @@ export default class FeishuWikiPlugin extends Plugin {
     progressModal.updateProgress(results.length, results.length, "");
 
     const summary = failCount > 0
-      ? `批量同步完成: 成功 ${successCount}, 失败 ${failCount}`
-      : `批量同步完成: ${successCount} 个文件`;
+      ? `批量同步完成: 成功 ${successCount}, 跳过 ${skippedCount}, 失败 ${failCount}`
+      : `批量同步完成: 成功 ${successCount}, 跳过 ${skippedCount}`;
     new Notice(summary, 5000);
   }
 

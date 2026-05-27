@@ -1,7 +1,7 @@
 {
   "id": "obsidian-feishu-wiki-sync",
   "name": "飞书知识库同步",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "minAppVersion": "1.4.0",
   "description": "将 Obsidian 笔记同步到飞书知识库，保留目录结构，支持增量更新",
   "author": "wwz",

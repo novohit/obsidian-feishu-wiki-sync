@@ -55,7 +55,7 @@ export class ImageResolver {
     src: string,
     sourceFilePath: string
   ): Promise<{ data: ArrayBuffer | null; fileName: string }> {
-    const fileName = src.split("/").pop() ?? "image.png";
+    const fileName = src.split(/[/?#]/).filter(Boolean).pop() ?? "image.png";
 
     // 网络图片
     if (src.startsWith("http://") || src.startsWith("https://")) {
@@ -69,8 +69,8 @@ export class ImageResolver {
     // 本地图片：先尝试相对路径，再尝试 vault 全局搜索
     const sourceDir = sourceFilePath.split("/").slice(0, -1).join("/");
     const candidates = [
-      src,
       `${sourceDir}/${src}`,
+      src,
       decodeURIComponent(src),
     ];
 

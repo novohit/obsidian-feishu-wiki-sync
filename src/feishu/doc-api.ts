@@ -67,25 +67,39 @@ export class DocApi {
    */
   async listRootBlockIds(documentId: string): Promise<string[]> {
     const token = await this.auth.getToken();
-    // 根 block 的 ID 与文档 ID 相同
-    const resp = await requestUrl({
-      url: `${API_BASE}/docx/v1/documents/${documentId}/blocks/${documentId}/children?page_size=200`,
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json; charset=utf-8",
-      },
-      throw: false,
-    });
+    const blockIds: string[] = [];
+    let pageToken = "";
 
-    const data: FeishuResponse<{ items?: DocxBlock[] }> = resp.json;
-    if (data.code !== 0) {
-      throw new Error(`获取文档块列表失败 (${data.code}): ${data.msg}`);
-    }
+    do {
+      const params = new URLSearchParams({ page_size: "200" });
+      if (pageToken) params.set("page_token", pageToken);
 
-    return (data.data?.items ?? [])
-      .map((b) => b.block_id)
-      .filter((id): id is string => !!id);
+      // 根 block 的 ID 与文档 ID 相同
+      const resp = await requestUrl({
+        url: `${API_BASE}/docx/v1/documents/${documentId}/blocks/${documentId}/children?${params.toString()}`,
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        throw: false,
+      });
+
+      const data: FeishuResponse<{ items?: DocxBlock[]; has_more?: boolean; page_token?: string }> =
+        resp.json;
+      if (data.code !== 0) {
+        throw new Error(`获取文档块列表失败 (${data.code}): ${data.msg}`);
+      }
+
+      blockIds.push(
+        ...(data.data?.items ?? [])
+          .map((b) => b.block_id)
+          .filter((id): id is string => !!id)
+      );
+      pageToken = data.data?.has_more ? data.data.page_token ?? "" : "";
+    } while (pageToken);
+
+    return blockIds;
   }
 
   /**
@@ -223,6 +237,7 @@ export class DocApi {
     // 如果有现有内容，逐个删除（用文档根 block 的 children batch_delete）
     if (existingBlockIds.length > 0) {
       // 用更简单的方式：直接删除根块的所有 children
+      let deleted = false;
       for (let attempt = 0; attempt < 3; attempt++) {
         await this.rateLimiter.acquire("doc");
         const token = await this.auth.getToken();
@@ -247,11 +262,16 @@ export class DocApi {
           if (data.data?.document_revision_id) {
             currentRevision = data.data.document_revision_id;
           }
+          deleted = true;
           break;
         }
         // revision 冲突则重新获取
         const freshDoc = await this.getDocument(documentId);
         currentRevision = freshDoc.revision_id;
+      }
+
+      if (!deleted) {
+        throw new Error("清空飞书文档旧内容失败，已停止写入以避免新旧内容混合");
       }
     }
 
