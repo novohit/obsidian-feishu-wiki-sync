@@ -1,8 +1,8 @@
 # Obsidian Feishu Wiki Sync（飞书知识库同步）
 
-一个将 Obsidian 笔记同步到飞书知识库的桌面端插件。插件会保留目录结构，支持可视化配置、连接测试、侧边栏选择性同步、批量同步、图片上传和 frontmatter 同步状态记录。
+把 Obsidian Markdown 笔记同步到飞书知识库的桌面端插件。插件支持连接测试、知识空间选择、侧边栏批量同步、目录结构映射、图片上传和 frontmatter 同步状态记录。
 
-> 推荐从 GitHub Releases 安装。Release 尚未发布或需要最新源码时，可以按本文的 Windows/macOS 源码构建步骤安装。
+**默认推荐安装方式：让 AI 或你自己按本文从源码构建安装。**
 
 ## 适用环境
 
@@ -13,58 +13,57 @@
 | 源码构建依赖 | Node.js `20+` 或 `22+`、npm、Git |
 | 飞书 | 企业自建应用，具备知识库、文档和云盘权限 |
 
-当前版本仅验证飞书中国区开放平台，暂未验证 Lark 国际版 endpoint。
+当前版本只验证飞书中国区开放平台 `open.feishu.cn`，暂未验证 Lark 国际版 endpoint。
 
-## 功能特性
+## 快速给 AI 的安装提示词
 
-### 核心能力
+把下面这段和仓库链接一起发给 AI：
 
-- **可视化配置**：在 Obsidian 设置页填写飞书应用凭据，一键测试连接。
-- **知识空间浏览器**：通过树形节点选择器选择目标知识空间或节点。
-- **目录结构映射**：将 Obsidian 文件夹层级映射为飞书知识库节点树。
-- **选择性同步**：侧边栏文件树支持勾选文件或文件夹。
-- **批量同步**：批量同步时显示实时进度弹窗。
-- **增量状态**：同步后在笔记 frontmatter 中记录飞书节点和最后同步时间。
-- **图片处理**：支持网络图片和 Obsidian 本地图片上传到飞书云盘。
+```text
+请帮我安装这个 Obsidian 插件：Obsidian Feishu Wiki Sync。
 
-### 格式支持
+我的系统是：Windows/macOS。
+我的 Obsidian vault 路径是：<填写你的 vault 路径>。
 
-| 格式 | 支持情况 |
-|---|---|
-| 标题 H1-H6 | 支持 |
-| 段落、粗体、斜体、删除线 | 支持 |
-| 行内代码、代码块 | 支持 |
-| 有序/无序列表 | 支持，含嵌套 |
-| Markdown 链接 | 支持 |
-| 网络图片 `![](https://...)` | 自动下载并上传到飞书 |
-| 本地图片 `![[image.png]]` | 自动上传到飞书云盘 |
-| Wikilink `[[note\|display]]` | 转为显示文本 |
-| 嵌入笔记 `![[note]]` | 转为引用提示 |
-| Callout `> [!note]` | 转为加粗引用块 |
-| 高亮 `==text==` | 转为加粗 |
-| 任务列表 `- [x]` | 支持 |
-| 引用块、分割线 | 支持 |
-| 表格 | 以代码块形式保留 |
+请按 README 从源码安装：
+1. 确认本机有 Node.js、npm、Git。
+2. 使用我提供的 GitHub 仓库地址 git clone 到临时目录。
+3. 运行 npm install。
+4. 运行 npm run build。
+5. 把生成的 main.js、manifest.json、styles.css 复制到：
+   <我的 vault>/.obsidian/plugins/obsidian-feishu-wiki-sync/
+6. 告诉我如何在 Obsidian 里关闭安全模式、启用第三方插件、启用「飞书知识库同步」。
+
+不要把源码目录、node_modules 或 data.json 复制进插件目录。
+插件目录下应该直接包含 main.js、manifest.json、styles.css。
+```
 
 ## 安装
 
-### 方式 A：从 Release 安装
+### 前置检查
 
-如果仓库的 [Releases](https://github.com/summerchaserwwz/obsidian-feishu-wiki-sync/releases/latest) 页面已经有发布版本，使用这个方式最简单：
+先确认本机已经安装 Node.js、npm 和 Git。
 
-1. 下载最新 Release 中的 `main.js`、`manifest.json`、`styles.css`，或下载 zip 后解压。
-2. 在你的 Obsidian vault 中创建插件目录：
-   - Windows：`你的Vault\.obsidian\plugins\obsidian-feishu-wiki-sync\`
-   - macOS：`你的Vault/.obsidian/plugins/obsidian-feishu-wiki-sync/`
-3. 将 `main.js`、`manifest.json`、`styles.css` 放入该目录。
-4. 打开 Obsidian：`设置 -> 第三方插件 -> 刷新/重启 Obsidian -> 启用「飞书知识库同步」`。
+Windows PowerShell 或 macOS Terminal 都可以执行：
 
-### 方式 B：Windows 从源码构建安装
+```bash
+node -v
+npm -v
+git --version
+```
 
-如果 Release 页面为空，或者你希望安装最新源码版本，使用 PowerShell 执行：
+要求：
+
+- Node.js 建议 `20+` 或 `22+`
+- npm 随 Node.js 一起安装
+- Git 能正常 clone GitHub 仓库
+
+### Windows：从源码构建安装
+
+在 PowerShell 里执行。先把 `$Vault` 改成你的 Obsidian vault 根目录。
 
 ```powershell
-# 改成你的 Obsidian vault 根目录。示例：D:\ObsidianVault
+$RepoUrl = "https://github.com/summerchaserwwz/obsidian-feishu-wiki-sync.git"
 $Vault = "D:\ObsidianVault"
 
 $PluginId = "obsidian-feishu-wiki-sync"
@@ -79,11 +78,15 @@ if (Test-Path -LiteralPath $WorkDir) {
   Remove-Item -LiteralPath $WorkDir -Recurse -Force
 }
 
-git clone https://github.com/summerchaserwwz/obsidian-feishu-wiki-sync.git $WorkDir
+git clone $RepoUrl $WorkDir
 Set-Location -LiteralPath $WorkDir
 
 npm install
 npm run build
+
+if (!(Test-Path -LiteralPath ".\main.js")) {
+  throw "构建失败：项目根目录没有生成 main.js。请检查 npm run build 输出。"
+}
 
 New-Item -ItemType Directory -Force -Path $PluginDir | Out-Null
 Copy-Item -LiteralPath ".\main.js" -Destination (Join-Path $PluginDir "main.js") -Force
@@ -93,14 +96,19 @@ Copy-Item -LiteralPath ".\styles.css" -Destination (Join-Path $PluginDir "styles
 Get-ChildItem -LiteralPath $PluginDir
 ```
 
-安装后重启 Obsidian，或在第三方插件页面刷新插件列表，然后启用「飞书知识库同步」。
+安装后打开 Obsidian：
 
-### 方式 C：macOS 从源码构建安装
+1. `设置 -> 第三方插件`
+2. 关闭安全模式
+3. 刷新或重启 Obsidian
+4. 启用「飞书知识库同步」
 
-如果 Release 页面为空，或者你希望安装最新源码版本，使用 Terminal 执行：
+### macOS：从源码构建安装
+
+在 Terminal 里执行。先把 `VAULT` 改成你的 Obsidian vault 根目录。
 
 ```bash
-# 改成你的 Obsidian vault 根目录。示例：$HOME/Documents/MyVault
+REPO_URL="https://github.com/summerchaserwwz/obsidian-feishu-wiki-sync.git"
 VAULT="$HOME/Documents/MyVault"
 
 PLUGIN_ID="obsidian-feishu-wiki-sync"
@@ -113,11 +121,16 @@ if [ ! -d "$VAULT" ]; then
 fi
 
 rm -rf "$WORK_DIR"
-git clone https://github.com/summerchaserwwz/obsidian-feishu-wiki-sync.git "$WORK_DIR"
+git clone "$REPO_URL" "$WORK_DIR"
 cd "$WORK_DIR"
 
 npm install
 npm run build
+
+if [ ! -f "main.js" ]; then
+  echo "构建失败：项目根目录没有生成 main.js。请检查 npm run build 输出。"
+  exit 1
+fi
 
 mkdir -p "$PLUGIN_DIR"
 cp main.js manifest.json styles.css "$PLUGIN_DIR/"
@@ -125,52 +138,141 @@ cp main.js manifest.json styles.css "$PLUGIN_DIR/"
 ls -la "$PLUGIN_DIR"
 ```
 
-安装后重启 Obsidian，或在第三方插件页面刷新插件列表，然后启用「飞书知识库同步」。
+安装后打开 Obsidian：
 
-### 给 AI 的安装提示词
-
-你可以把下面这段和仓库链接一起发给 AI：
-
-```text
-请根据 README 帮我安装 Obsidian Feishu Wiki Sync。我的系统是 Windows/macOS，我的 Obsidian vault 路径是：<填写你的 vault 路径>。如果 Releases 有 main.js、manifest.json、styles.css，就优先下载 Release；如果没有 Release，就从源码 git clone、npm install、npm run build，然后把 main.js、manifest.json、styles.css 复制到 vault 的 .obsidian/plugins/obsidian-feishu-wiki-sync/ 目录。安装前先确认 Node.js、npm、Git 可用，安装后告诉我如何在 Obsidian 中启用插件。
-```
+1. `Settings -> Community plugins`
+2. 关闭 Restricted mode
+3. Reload 或重启 Obsidian
+4. 启用「飞书知识库同步」
 
 ## 飞书配置
 
-### 第一步：创建飞书自建应用
+完整跑通需要三层权限：
+
+```text
+App ID / App Secret 正确
+  -> 飞书开放平台 API 权限已开通
+  -> 目标知识库给这个应用或应用所在群授权
+```
+
+### 1. 创建飞书自建应用
 
 1. 打开 [飞书开放平台](https://open.feishu.cn)。
 2. 创建 **企业自建应用**。
-3. 在 **权限管理** 页面开通以下权限。
+3. 复制应用的 **App ID** 和 **App Secret**。
+4. 在 **权限管理** 里开通以下权限。
 
 | 权限 | 用途 |
 |---|---|
-| `wiki:wiki` | 知识库读写，创建节点、读取节点、写入文档 |
-| `docx:document` | 文档读写，进行 Block 级别内容操作 |
-| `drive:drive` | 云盘文件上传，用于图片上传 |
+| `wiki:wiki` | 列出知识空间、读取节点、创建知识库节点 |
+| `docx:document` | 读取文档信息、删除旧 Block、写入新的 Docx Block |
+| `drive:drive` | 上传本地图片或网络图片到飞书云盘 |
 
-4. 在 **版本管理与发布** 中发布应用。
+5. 在 **版本管理与发布** 中发布应用。
 
-### 第二步：将应用加入知识空间
+注意：只点「测试连接」成功，只说明 App ID / App Secret 正确，不代表应用已经能访问目标知识库。
 
-飞书知识空间通常不能直接把应用作为普通成员加入，可以使用以下方式之一：
+### 2. 给目标知识库授权
 
-1. 创建一个包含该应用机器人的飞书群。
-2. 在知识空间设置中添加该群为管理员。
+这是最容易卡住的一步。
 
-或者：
+插件调用的是飞书 Wiki API。目标知识库必须给这个应用空间级访问权限，否则 Obsidian 里可能只能看到其他已授权知识库，或者看不到目标知识库。
 
-1. 打开目标知识空间。
-2. 点击右上角 `...`。
-3. 选择添加文档应用，并搜索你的应用名称。
+推荐优先级：
 
-### 第三步：在 Obsidian 中配置
+**优先方式：直接添加文档应用**
 
-1. 打开 `设置 -> 第三方插件 -> 飞书知识库同步`。
-2. 填写飞书应用的 **App ID** 和 **App Secret**。
-3. 点击 **测试连接**。
-4. 点击 **浏览并选择**，选择目标知识空间和根节点。
-5. 首次建议保持 **手动同步**，确认效果后再考虑保存时自动同步。
+1. 打开目标飞书知识库。
+2. 找到知识库设置、成员设置或右上角更多菜单。
+3. 使用「添加文档应用」或类似入口。
+4. 搜索你的自建应用名称。
+5. 授予可编辑或管理员权限。
+
+**备用方式：通过群组授权**
+
+1. 创建一个飞书群。
+2. 把这个自建应用的机器人加入该群。
+3. 打开目标飞书知识库。
+4. 进入知识库设置或成员设置。
+5. 添加这个群为管理员或可编辑成员。
+
+也可以在知识库里通过「添加文档应用」直接添加该自建应用。不同飞书租户 UI 可能略有差异，以知识库设置里的权限入口为准。
+
+判断标准：
+
+| 状态 | 含义 |
+|---|---|
+| Obsidian 测试连接成功 | App ID / App Secret 正确 |
+| 浏览并选择时能看到目标知识库 | 知识库空间权限正确 |
+| 能选中根节点或子节点 | Wiki 节点读取权限正确 |
+| 能同步一篇测试笔记 | 写入文档和创建节点权限正确 |
+
+### 3. 在 Obsidian 中配置插件
+
+打开：
+
+```text
+设置 -> 第三方插件 -> 飞书知识库同步
+```
+
+填写：
+
+```text
+App ID
+App Secret
+```
+
+然后按顺序操作：
+
+1. 点击 **测试连接**。
+2. 点击 **浏览并选择**。
+3. 选择目标知识空间。
+4. 选择目标节点，首次建议选知识空间根部或专门的测试节点。
+5. 同步模式先保持 **手动同步**。
+
+首次不要直接全库同步。建议先同步一篇测试笔记。
+
+插件里还有这些配置项：
+
+| 配置项 | 建议 |
+|---|---|
+| 同步模式 | 首次使用保持手动同步；确认稳定后再考虑保存时自动同步 |
+| Frontmatter 过滤字段 | 如果只想同步公开笔记，可填 `publish: true` |
+| 排除文件夹 | 默认排除 `templates, .trash`，可加 `drafts` 等 |
+| 自动上传本地图片 | 需要图片同步时开启；图片异常时可先关闭排查正文同步 |
+| 更新策略 | 默认覆盖飞书端；不想覆盖已有文档时选跳过 |
+| 调试日志 | 排错时再开启 |
+
+提醒：`App Secret` 和缓存 token 会写入本地插件数据文件：
+
+```text
+<你的 vault>/.obsidian/plugins/obsidian-feishu-wiki-sync/data.json
+```
+
+不要提交或公开这个文件。
+
+## 首次同步建议
+
+新建一篇测试笔记：
+
+```markdown
+# Feishu Sync Test
+
+这是一篇同步测试笔记。
+
+- 支持列表
+- 支持 **加粗**
+- 支持 `inline code`
+```
+
+右键这篇笔记，选择「同步到飞书知识库」。
+
+在飞书端确认：
+
+1. 目标知识库中出现了文档。
+2. 标题正确。
+3. 正文可读。
+4. 再次同步不会重复创建新文档。
 
 ## 使用方法
 
@@ -212,24 +314,33 @@ feishu_doc_revision: 3
 ---
 ```
 
-后续再次同步同一文件时，插件会根据这些字段定位飞书端文档。
+这些字段用于记录 Obsidian 笔记和飞书文档之间的映射关系。不要随意删除，否则后续同步可能重复创建文档。
 
-## 安全说明
+## 隐私与安全
 
 - 插件使用飞书 `tenant_access_token`，不依赖第三方 OAuth 中继服务。
 - `App ID`、`App Secret` 和缓存 token 存储在 Obsidian 本地插件数据文件 `data.json` 中。
-- `data.json` 不应提交到公开仓库，也不应分享给他人。
-- 同步成功后写入笔记 frontmatter 的 `feishu_*` 字段包含飞书空间、节点和文档标识；公开发布 vault 或截图前请先脱敏。
-- 所有飞书 API 调用走 HTTPS。
+- 不要公开 `.obsidian/plugins/obsidian-feishu-wiki-sync/data.json`。
+- 同步成功后写入笔记 frontmatter 的 `feishu_*` 字段包含飞书空间、节点和文档标识。
+- 公开发布 vault、截图或报错日志前，请先脱敏 App Secret、token、飞书 URL、空间 ID、文档 token、头像和企业域名。
 - 当前默认写入策略会覆盖飞书端同一文档内容；正式批量同步前建议先用测试节点验证。
 
 ## 常见问题
 
-### Release 页面为空怎么办？
+| 现象 | 大概率原因 | 处理方式 |
+|---|---|---|
+| 测试连接失败 | App ID / App Secret 错误，应用未发布，或权限审批未生效 | 回飞书开放平台检查凭证、权限和应用版本 |
+| 测试连接成功，但看不到目标知识库 | 目标知识库没有给应用空间级权限 | 在知识库设置中添加文档应用，或把应用所在群加为可编辑/管理员 |
+| 同步时报 403 | API 权限或目标节点编辑权限不足 | 检查 `wiki:wiki`、`docx:document`、知识库成员权限 |
+| 图片上传失败 | `drive:drive` 权限缺失、图片过大、路径不正确 | 先用无图片笔记测试，再检查图片路径和权限 |
+| 同步后重复创建文档 | `feishu_*` frontmatter 被删除，或切换了目标节点 | 保留同步元数据，固定目标知识空间和节点 |
+| Obsidian 看不到插件 | 插件目录层级错误或未重启 | 确认插件目录下直接有三件套 |
 
-直接使用“从源码构建安装”的 Windows 或 macOS 命令。源码安装会在本机生成 `main.js`，再复制到 Obsidian 插件目录。
+### 测试连接成功，但看不到目标知识库
 
-### Obsidian 看不到插件怎么办？
+大概率是知识库本身没给应用权限。去目标知识库设置里，把应用或包含应用机器人的群加为管理员或可编辑成员。
+
+### Obsidian 看不到插件
 
 检查插件目录中是否有这三个文件：
 
@@ -239,20 +350,21 @@ feishu_doc_revision: 3
 .obsidian/plugins/obsidian-feishu-wiki-sync/styles.css
 ```
 
-然后重启 Obsidian，或在第三方插件页面刷新插件列表。
+如果目录中多了一层源码目录，例如：
 
-### 测试连接失败怎么办？
+```text
+.obsidian/plugins/obsidian-feishu-wiki-sync/obsidian-feishu-wiki-sync/main.js
+```
 
-依次检查：
-
-1. App ID 和 App Secret 是否来自同一个飞书自建应用。
-2. 应用是否已经发布。
-3. 权限是否包含 `wiki:wiki`、`docx:document`、`drive:drive`。
-4. 应用是否已加入目标知识空间。
+就是装错层级了。
 
 ### 可以自动同步吗？
 
-可以。设置中的同步模式支持手动和保存时自动同步。首次使用建议先手动同步，确认目标知识空间、目录结构和覆盖行为符合预期后，再开启保存时自动同步。
+可以，但首次使用建议先手动同步。确认目标知识空间、目录结构、权限和覆盖行为符合预期后，再开启保存时自动同步。
+
+### 飞书端内容会被覆盖吗？
+
+会。当前插件以 Obsidian 为源头，同步时会覆盖飞书端同一文档内容。不要在飞书端长期手动编辑同一篇同步文档。
 
 ## 开发
 
@@ -269,70 +381,6 @@ npm run dev
 完整发布前测试矩阵见 [TESTING.md](./TESTING.md)。
 
 完整使用教程见 [docs/TUTORIAL.md](./docs/TUTORIAL.md)。
-
-## 发布维护
-
-发布前检查：
-
-```bash
-npm install
-npm run check
-npm run lint
-npm run build
-```
-
-创建 GitHub Release：
-
-```bash
-git tag v0.2.0
-git push origin v0.2.0
-```
-
-推送 tag 后，GitHub Actions 会自动构建并发布 Release，包含：
-
-- `main.js`
-- `manifest.json`
-- `styles.css`
-- `obsidian-feishu-wiki-sync-v0.2.0.zip`
-
-## 项目架构
-
-```text
-src/
-├── main.ts                    # 插件入口，生命周期、命令/菜单注册
-├── settings/
-│   ├── settings-types.ts      # 设置项类型定义和默认值
-│   └── settings-tab.ts        # 设置页面 UI
-├── feishu/
-│   ├── auth.ts                # 飞书认证
-│   ├── wiki-api.ts            # 知识库 API
-│   ├── doc-api.ts             # 文档 Block API
-│   ├── drive-api.ts           # 云盘上传 API
-│   ├── rate-limiter.ts        # API 频率控制
-│   └── types.ts               # 飞书 API 类型定义
-├── converter/
-│   ├── markdown-to-blocks.ts  # Markdown 转飞书 Block
-│   └── image-resolver.ts      # 图片路径解析和上传
-├── sync/
-│   ├── sync-engine.ts         # 同步核心
-│   └── sync-state.ts          # frontmatter 同步状态管理
-└── ui/
-    ├── sync-sidebar-view.ts   # 侧边栏面板
-    ├── wiki-browser-modal.ts  # 知识空间节点浏览器弹窗
-    └── sync-progress-modal.ts # 批量同步进度弹窗
-```
-
-## 与竞品的对比
-
-| 特性 | 本插件 | FeishuShare | ObShare | ob2feishu |
-|---|---|---|---|---|
-| 目录结构保留 | 自动映射 | 不支持 | 不支持 | 手动 |
-| 第三方中继 | 无 | 依赖 md2feishu.xinqi.life | 无 | 无 |
-| 文档更新方式 | Block API 直接构建 | import-then-patch | N/A | N/A |
-| 连接测试 | 支持 | 无 | 无 | 无 |
-| 侧边栏面板 | 文件夹树 + checkbox | 无 | 无 | 无 |
-| Obsidian 语法 | wikilink/callout/embed 适配 | 部分 | 部分 | 部分 |
-| 类型 | Obsidian 插件 | Obsidian 插件 | Obsidian 插件 | Python CLI |
 
 ## License
 

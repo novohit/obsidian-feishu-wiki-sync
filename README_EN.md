@@ -21,28 +21,24 @@ The complete installation guide is maintained in Chinese:
 - [README.md](./README.md)
 - [docs/TUTORIAL.md](./docs/TUTORIAL.md)
 
-Short version:
+Recommended path: build from source.
 
-1. Download `main.js`, `manifest.json`, and `styles.css` from the latest GitHub Release.
-2. Copy them into your Obsidian vault:
+```bash
+git clone https://github.com/summerchaserwwz/obsidian-feishu-wiki-sync.git
+cd obsidian-feishu-wiki-sync
+npm install
+npm run build
+```
+
+Then copy `main.js`, `manifest.json`, and `styles.css` into your Obsidian vault:
 
 ```text
 .obsidian/plugins/obsidian-feishu-wiki-sync/
 ```
 
-3. Restart Obsidian.
-4. Enable the plugin from `Settings -> Community plugins`.
-5. Configure your Feishu App ID and App Secret.
-6. Test connection and choose a target wiki space.
+Do not copy the source folder, `node_modules`, or `data.json` into the plugin directory. The plugin directory should directly contain those three files.
 
-If no Release is available, build from source:
-
-```bash
-npm install
-npm run build
-```
-
-Then copy `main.js`, `manifest.json`, and `styles.css` into the plugin directory above.
+Restart Obsidian, enable the plugin from `Settings -> Community plugins`, configure your Feishu App ID and App Secret, test connection, and choose a target wiki space.
 
 ## Feishu Permissions
 

@@ -23,22 +23,18 @@
 
 ## 1. 安装插件
 
-### 从 Release 安装
+默认推荐从源码构建安装。Release 不是必需条件。
 
-1. 打开最新 Release：<https://github.com/summerchaserwwz/obsidian-feishu-wiki-sync/releases/latest>
-2. 下载 `main.js`、`manifest.json`、`styles.css`，或下载 zip 后解压。
-3. 把三个文件放进你的 Obsidian vault：
+先按 README 中的 Windows/macOS 源码安装步骤执行。核心动作是：
+
+1. `git clone` 仓库到临时目录。
+2. `npm install`
+3. `npm run build`
+4. 把生成的三个文件放进你的 Obsidian vault：
 
 ```text
 .obsidian/plugins/obsidian-feishu-wiki-sync/
 ```
-
-4. 重启 Obsidian。
-5. 进入 `设置 -> 第三方插件`，启用「飞书知识库同步」。
-
-### 从源码构建安装
-
-如果 Release 还没有发布，或你希望使用最新源码，请按 README 中的 Windows/macOS 源码安装步骤执行。
 
 安装成功后，插件目录应直接包含：
 
@@ -178,9 +174,8 @@ feishu_doc_revision: 3
 请根据 README 帮我安装 Obsidian Feishu Wiki Sync。
 我的系统是 Windows/macOS。
 我的 Obsidian vault 路径是：<填写你的 vault 路径>。
-如果 Releases 有 main.js、manifest.json、styles.css，就优先下载 Release。
-如果没有 Release，就从源码 git clone、npm install、npm run build，
-然后把 main.js、manifest.json、styles.css 复制到 vault 的
+请从源码 git clone、npm install、npm run build，
+然后把生成的 main.js、manifest.json、styles.css 复制到 vault 的
 .obsidian/plugins/obsidian-feishu-wiki-sync/ 目录。
 安装前先确认 Node.js、npm、Git 可用。
 安装后告诉我如何在 Obsidian 中启用插件。
