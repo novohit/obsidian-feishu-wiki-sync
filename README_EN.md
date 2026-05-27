@@ -21,7 +21,7 @@ The complete installation guide is maintained in Chinese:
 - [README.md](./README.md)
 - [docs/TUTORIAL.md](./docs/TUTORIAL.md)
 
-Recommended path: build from source.
+Recommended path: build from source. A GitHub Release is optional, not required.
 
 ```bash
 git clone https://github.com/summerchaserwwz/obsidian-feishu-wiki-sync.git
