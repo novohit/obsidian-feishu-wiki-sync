@@ -25,7 +25,15 @@
 
 默认推荐从源码构建安装。Release 不是必需条件。
 
-先按 README 中的 Windows/macOS 源码安装步骤执行。核心动作是：
+如果你把本教程单独发给 AI，请同时给它仓库地址，并要求它优先读取仓库根目录 `README.md`。README 里有完整 Windows PowerShell 和 macOS Terminal 安装脚本。
+
+仓库地址：
+
+```text
+https://github.com/summerchaserwwz/obsidian-feishu-wiki-sync.git
+```
+
+核心动作是：
 
 1. `git clone` 仓库到临时目录。
 2. `npm install`
@@ -43,6 +51,10 @@ main.js
 manifest.json
 styles.css
 ```
+
+如果 AI 执行时发现 `node`、`npm` 或 `git` 不存在，先安装 Node.js LTS 和 Git，再重新打开终端继续。Windows 可以用官网安装包或 `winget install OpenJS.NodeJS.LTS`、`winget install Git.Git`；macOS 可以用官网安装包或 `brew install node git`。
+
+如果 `git clone` 失败，让 AI 先检查仓库链接是否能在浏览器打开，再检查 GitHub 网络访问、代理或公司网络限制。
 
 ## 2. 创建飞书自建应用
 

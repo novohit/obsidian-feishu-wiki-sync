@@ -58,6 +58,15 @@ git --version
 - npm 随 Node.js 一起安装
 - Git 能正常 clone GitHub 仓库
 
+如果 `node`、`npm` 或 `git` 提示找不到命令，先安装缺失组件，再重新打开终端：
+
+| 系统 | 推荐处理 |
+|---|---|
+| Windows | 安装 Node.js LTS 和 Git for Windows；也可以使用 `winget install OpenJS.NodeJS.LTS`、`winget install Git.Git` |
+| macOS | 安装 Node.js LTS 和 Git；也可以使用 Homebrew 执行 `brew install node git` |
+
+如果 `git clone` 失败，先确认仓库地址可以在浏览器打开，再检查 GitHub 网络访问、代理或公司网络限制。
+
 ### Windows：从源码构建安装
 
 在 PowerShell 里执行。先把 `$Vault` 改成你的 Obsidian vault 根目录。
@@ -171,6 +180,8 @@ App ID / App Secret 正确
 5. 在 **版本管理与发布** 中发布应用。
 
 注意：只点「测试连接」成功，只说明 App ID / App Secret 正确，不代表应用已经能访问目标知识库。
+
+如果企业管理员开启了权限审批，权限申请和应用发布可能需要审批或等待几分钟生效。遇到刚发布后仍失败的情况，先刷新开放平台应用版本，再重新打开 Obsidian 测试。
 
 ### 2. 给目标知识库授权
 
@@ -326,6 +337,27 @@ feishu_doc_revision: 3
 - 当前默认写入策略会覆盖飞书端同一文档内容；正式批量同步前建议先用测试节点验证。
 
 ## 常见问题
+
+### 最小排错树
+
+```text
+测试连接失败
+  -> 先查 App ID / App Secret 是否填错
+  -> 再查应用是否已经发布
+  -> 再查 API 权限是否已审批并生效
+
+测试连接成功，但看不到目标知识库
+  -> App 身份正确，但目标知识库没有授权
+  -> 去知识库设置添加文档应用，或把应用所在群加入知识库
+
+能看到知识库，但同步时报 403
+  -> 目标节点不可编辑，或 wiki/docx 权限不足
+  -> 给应用可编辑/管理员权限，并确认 `wiki:wiki`、`docx:document` 已开通
+
+文字能同步，但图片失败
+  -> 优先检查 `drive:drive` 权限
+  -> 再检查图片路径、图片大小和网络访问
+```
 
 | 现象 | 大概率原因 | 处理方式 |
 |---|---|---|
