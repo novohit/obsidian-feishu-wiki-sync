@@ -64,7 +64,8 @@ export class SyncEngine {
   async syncFile(
     file: TFile,
     targetSpaceId?: string,
-    targetParentNodeToken?: string
+    targetParentNodeToken?: string,
+    syncRootPath?: string
   ): Promise<SyncResult> {
     const spaceId = targetSpaceId ?? this.settings.defaultSpaceId;
     const baseParentToken = targetParentNodeToken ?? this.settings.defaultParentNodeToken;
@@ -121,12 +122,11 @@ export class SyncEngine {
           has_child: false,
         };
       } else {
-        // 新建节点：先根据文件路径确保父目录节点链存在
-        const actualParentToken = await this.ensurePathNodes(
-          spaceId,
-          file.path,
-          baseParentToken
-        );
+        // 新建节点：从 syncFolder 调用时父节点已由 ensureFolderNode 解析，直接使用；
+        // 单文件同步时需要根据文件路径确保父目录节点链存在
+        const actualParentToken = syncRootPath
+          ? baseParentToken
+          : await this.ensurePathNodes(spaceId, file.path, baseParentToken);
         node = await this.wikiApi.createNode(spaceId, title, actualParentToken || undefined);
       }
 
@@ -191,17 +191,12 @@ export class SyncEngine {
   /**
    * 根据文件的 vault 路径，确保飞书知识库中对应的文件夹节点链存在
    *
+   * 仅用于单文件同步场景；从 syncFolder 调用时父节点已由 ensureFolderNode 解析。
+   *
    * 例如 file.path = "03-KNOWLEDGE/AI/prompt.md"
    * → 确保 "03-KNOWLEDGE" 节点存在（父为 baseParentToken）
    * → 确保 "AI" 节点存在（父为 "03-KNOWLEDGE" 节点）
    * → 返回 "AI" 节点的 token 作为文档的父节点
-   *
-   * 输入参数：
-   * - spaceId: 知识空间 ID
-   * - filePath: 文件在 vault 中的完整路径
-   * - baseParentToken: 默认根节点 token
-   *
-   * 返回值：文件应该放在的父节点 token
    */
   private async ensurePathNodes(
     spaceId: string,
@@ -298,7 +293,7 @@ export class SyncEngine {
         folderNodeCache
       );
 
-      const result = await this.syncFile(file, targetSpaceId, parentNodeToken);
+      const result = await this.syncFile(file, targetSpaceId, parentNodeToken, folder.path);
       results.push(result);
     }
 
