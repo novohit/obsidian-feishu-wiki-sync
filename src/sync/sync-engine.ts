@@ -129,10 +129,15 @@ export class SyncEngine {
 
       // 预处理 Obsidian 语法 → 标准 Markdown，再用飞书 convert API 转换并写入
       const processedContent = preprocessObsidian(content);
-      const { blockIdRelations, imageUrlMap } = await this.docApi.overwriteDocumentFromMarkdown(node.obj_token, processedContent);
+      if (processedContent.trim()) {
+        const { blockIdRelations, imageUrlMap } = await this.docApi.overwriteDocumentFromMarkdown(node.obj_token, processedContent);
 
-      // 处理图片：convert API 返回的 image block 需要单独上传素材
-      await this.processImagesAfterConvert(imageUrlMap, blockIdRelations, node.obj_token, file.path);
+        // 处理图片：convert API 返回的 image block 需要单独上传素材
+        await this.processImagesAfterConvert(imageUrlMap, blockIdRelations, node.obj_token, file.path);
+      } else {
+        // 空内容：清空文档
+        await this.docApi.overwriteDocument(node.obj_token, []);
+      }
 
       // 更新 frontmatter 同步元数据
       const doc = await this.docApi.getDocument(node.obj_token);
