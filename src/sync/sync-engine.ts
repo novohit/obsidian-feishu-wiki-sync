@@ -8,10 +8,10 @@
  *
  * 流程：
  * 1. 读取文件内容，去除 frontmatter
- * 2. 转换 Markdown → 飞书 Block 数组
- * 3. 处理图片（解析路径 → 上传 Drive → 填充 token）
+ * 2. 预处理 Obsidian 语法为标准 Markdown
+ * 3. 飞书 convert API 将 Markdown 转为 Block
  * 4. 查找或创建知识库节点
- * 5. 覆盖写入文档内容
+ * 5. descendant API 覆盖写入文档内容
  * 6. 更新 frontmatter 同步元数据
  */
 
@@ -21,7 +21,7 @@ import { WikiApi } from "../feishu/wiki-api";
 import { DocApi } from "../feishu/doc-api";
 import { DriveApi } from "../feishu/drive-api";
 import { WikiNode, DocxBlock } from "../feishu/types";
-import { markdownToBlocks, stripFrontmatter } from "../converter/markdown-to-blocks";
+import { preprocessObsidian, stripFrontmatter } from "../converter/markdown-to-blocks";
 import { ImageResolver } from "../converter/image-resolver";
 import { SyncStateManager, SyncMeta } from "./sync-state";
 
@@ -93,9 +93,6 @@ export class SyncEngine {
       const content = stripFrontmatter(rawContent);
       const title = file.basename;
 
-      // Markdown → Block 转换
-      const { blocks, pendingImages } = markdownToBlocks(content);
-
       // 查找或创建知识库节点（文档）
       const existingMeta = this.syncState.readSyncMeta(file);
       let node: WikiNode;
@@ -130,16 +127,12 @@ export class SyncEngine {
         node = await this.wikiApi.createNode(spaceId, title, actualParentToken || undefined);
       }
 
-      // 处理图片（上传 Drive 并填充 block token）
-      const processedBlocks = await this.processImages(
-        blocks,
-        pendingImages,
-        node.obj_token,
-        file.path
-      );
+      // 预处理 Obsidian 语法 → 标准 Markdown，再用飞书 convert API 转换并写入
+      const processedContent = preprocessObsidian(content);
+      const { blockIdRelations, imageUrlMap } = await this.docApi.overwriteDocumentFromMarkdown(node.obj_token, processedContent);
 
-      // 写入文档内容（覆盖）
-      await this.docApi.overwriteDocument(node.obj_token, processedBlocks);
+      // 处理图片：convert API 返回的 image block 需要单独上传素材
+      await this.processImagesAfterConvert(imageUrlMap, blockIdRelations, node.obj_token, file.path);
 
       // 更新 frontmatter 同步元数据
       const doc = await this.docApi.getDocument(node.obj_token);
@@ -186,6 +179,39 @@ export class SyncEngine {
     if (actual === undefined || actual === null) return false;
 
     return String(actual).trim().toLowerCase() === expected.toLowerCase();
+  }
+
+  /**
+   * 处理 convert API 返回的图片块
+   *
+   * 流程：
+   * 1. 从 imageUrlMap 获取临时 block ID 和对应的图片 URL
+   * 2. 通过 blockIdRelations 找到真实 block ID
+   * 3. 下载图片并上传到飞书（用 block ID 作 parent_node）
+   * 4. 调用 replaceImage 更新 block
+   */
+  private async processImagesAfterConvert(
+    imageUrlMap: { block_id: string; image_url: string }[],
+    blockIdRelations: { temporary_block_id: string; block_id: string }[],
+    documentId: string,
+    sourceFilePath: string
+  ): Promise<void> {
+    if (imageUrlMap.length === 0) return;
+
+    const relationMap = new Map(blockIdRelations.map((r) => [r.temporary_block_id, r.block_id]));
+
+    for (const img of imageUrlMap) {
+      const realBlockId = relationMap.get(img.block_id) ?? img.block_id;
+
+      try {
+        const fileToken = await this.imageResolver.resolveAndUpload(img.image_url, realBlockId, sourceFilePath);
+        if (fileToken) {
+          await this.docApi.replaceImage(documentId, realBlockId, fileToken);
+        }
+      } catch (err) {
+        console.warn(`[FeishuSync] 图片处理失败 "${img.image_url}":`, err);
+      }
+    }
   }
 
   /**
