@@ -154,7 +154,18 @@ function parseInline(text: string): TextElement[] {
     // 链接 [text](url)
     m = remaining.match(/^\[([^\]]*)\]\(([^)]+)\)/);
     if (m) {
-      elements.push({ text_run: { content: m[1] || m[2], text_element_style: { link: { url: m[2] } } } });
+      const url = m[2];
+      // TODO: 非 http(s) 链接（如 Obsidian 相对路径）当前降级为纯文本，
+      //       后续可解析为 vault 内文件路径，查找 frontmatter 中的 feishu_wiki_node，
+      //       拼接为飞书文档链接 https://<domain>/wiki/<node_token>
+      const isValidUrl = /^(https?|mailto):/.test(url);
+      if (isValidUrl) {
+        elements.push({ text_run: { content: m[1] || url, text_element_style: { link: { url } } } });
+      } else {
+        // 飞书不支持的协议，保留显示文本和链接地址
+        const display = m[1] ? `${m[1]} (${url})` : url;
+        elements.push({ text_run: { content: display } });
+      }
       remaining = remaining.slice(m[0].length);
       continue;
     }
